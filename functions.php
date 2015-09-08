@@ -8,7 +8,7 @@
 function priv_session_start() {
     $session_name = 'priv_session_id';
     $secure = false;
-    $httponly = true; // Questo impedirà ad un javascript di essere in grado di accedere all'id di sessione.
+    $httponly = true;
     ini_set('session.use_only_cookies', 1); // Forza la sessione ad utilizzare solo i cookie.
     $cookieParams = session_get_cookie_params();
     session_set_cookie_params($cookieParams["lifetime"], $cookieParams["path"], $cookieParams["domain"], $secure, $httponly);
@@ -33,20 +33,20 @@ function login($email, $password,$mysqli ) {
 
         if($stmt->num_rows == 1) { // esiste
             //verifica attaco
-            if(checkbrute($user_id, $mysqli) == true) {
+            if(checkB($user_id, $mysqli) == true) {
                 // Account disabilitato si può inviare una mail
                 echo "account lock causa rischio compromissione";
                 return false;
             } else {
                 if($db_password == $password) { // controlla le pw
-                    $user_browser = $_SERVER['HTTP_USER_AGENT']; // Recupero il parametro 'user-agent' relativo all'utente corrente.
-                    $user_id = preg_replace("/[^0-9]+/", "", $user_id); // ci proteggiamo da un attacco XSS
+                    $user_browser = $_SERVER['HTTP_USER_AGENT'];
+                    $user_id = preg_replace("/[^0-9]+/", "", $user_id); //
                     $_SESSION['user_id'] = $user_id;
-                    $idAzienda = preg_replace("/[^0-9]+/", "", $id_azienda); // ci proteggiamo da un attacco XSS
+                    $idAzienda = preg_replace("/[^0-9]+/", "", $id_azienda);
                     $_SESSION['idAzienda'] = $idAzienda;
-                    $nomeTitolare = preg_replace("/[^a-zA-Z0-9_\-]+/", "", $nome); // ci proteggiamo da un attacco XSS
+                    $nomeTitolare = preg_replace("/[^a-zA-Z0-9_\-]+/", "", $nome);
                     $_SESSION['nomeTitolare'] = $nomeTitolare;
-                    $cognomeTitolare = preg_replace("/[^a-zA-Z0-9_\-]+/", "", $cognome); // ci proteggiamo da un attacco XSS
+                    $cognomeTitolare = preg_replace("/[^a-zA-Z0-9_\-]+/", "", $cognome);
                     $_SESSION['cognomeTitolare'] = $cognomeTitolare;
                     $_SESSION['login_string'] = hash('sha512', $password.$user_browser);
                     // Login corretto
@@ -68,15 +68,15 @@ function login($email, $password,$mysqli ) {
 
 function login_check($mysqli) {
 
-    // Verifica che tutte le variabili di sessione siano impostate correttamente
+
     if(isset($_SESSION['user_id'], $_SESSION['idAzienda'], $_SESSION['login_string'])) {
         $user_id = $_SESSION['user_id'];
         $login_string = $_SESSION['login_string'];
         $idAzienda = $_SESSION['idAzienda'];
-        $user_browser = $_SERVER['HTTP_USER_AGENT']; // reperisce la stringa 'user-agent' dell'utente.
+        $user_browser = $_SERVER['HTTP_USER_AGENT'];
         if ($stmt = $mysqli->prepare("SELECT password FROM members WHERE id = ? LIMIT 1")) {
-            $stmt->bind_param('i', $user_id); // esegue il bind del parametro '$user_id'.
-            $stmt->execute(); // Esegue la query creata.
+            $stmt->bind_param('i', $user_id);
+            $stmt->execute();
             $stmt->store_result();
 
             if($stmt->num_rows == 1) { // se l'utente esiste
@@ -104,7 +104,7 @@ function login_check($mysqli) {
     }
 }
 
-function checkbrute($user_id, $mysqli) {
+function checkB($user_id, $mysqli) {
     // Recupero il timestamp
     $now = time();
     // Vengono analizzati tutti i tentativi di login a partire dalle ultime due ore.
